@@ -1,0 +1,90 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: vibeproto-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
+      MYSQL_DATABASE: vibeproto
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: vibeproto-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: vibeproto-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+
+  backend:
+    image: ${REGISTRY:-ghcr.io}/vibeproto-backend:${IMAGE_TAG:-latest}
+    container_name: vibeproto-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-root}
+      REDIS_HOST: redis
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      JWT_SECRET: ${JWT_SECRET}
+      DEPLOY_ROOT: /opt/vibeproto/projects
+      STORAGE_ROOT: /opt/vibeproto/storage
+      BASE_PREVIEW_URL: ${BASE_PREVIEW_URL}
+    volumes:
+      - ${DEPLOY_ROOT:-/opt/vibeproto/projects}:/opt/vibeproto/projects
+      - ${STORAGE_ROOT:-/opt/vibeproto/storage}:/opt/vibeproto/storage
+
+  frontend:
+    image: ${REGISTRY:-ghcr.io}/vibeproto-frontend:${IMAGE_TAG:-latest}
+    container_name: vibeproto-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  prototype-server:
+    image: nginx:1.27-alpine
+    container_name: vibeproto-nginx
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${DEPLOY_ROOT:-/opt/vibeproto/projects}:/opt/vibeproto/projects
+
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:

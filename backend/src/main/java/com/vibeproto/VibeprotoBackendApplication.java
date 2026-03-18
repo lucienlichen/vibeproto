@@ -1,0 +1,16 @@
+package com.vibeproto;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.mybatis.spring.annotation.MapperScan;
+
+@SpringBootApplication
+@ConfigurationPropertiesScan
+@MapperScan("com.vibeproto.**.mapper")
+public class VibeprotoBackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(VibeprotoBackendApplication.class, args);
+    }
+}

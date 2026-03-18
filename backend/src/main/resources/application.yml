@@ -1,0 +1,58 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: vibeproto-backend
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/vibeproto?serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  jackson:
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket: vibeproto
+
+vibeproto:
+  jwt:
+    secret: ${JWT_SECRET:replace-with-strong-secret}
+    expiration: 86400
+  system:
+    base-preview-url: ${BASE_PREVIEW_URL:http://localhost:8090}
+  storage:
+    root-path: ${STORAGE_ROOT:/tmp/vibeproto-storage}
+  deploy:
+    root-path: ${DEPLOY_ROOT:/opt/vibeproto/projects}
+  build:
+    timeout-seconds: 300
+    docker-image: node:18-alpine
+  features:
+    documents-enabled: true
+
+logging:
+  level:
+    com.vibeproto: info

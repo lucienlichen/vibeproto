@@ -1,0 +1,82 @@
+# ===========================
+# OS & IDE
+# ===========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===========================
+# Frontend (Node.js / Vue)
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+frontend/coverage/
+frontend/.cache/
+frontend/.vite/
+
+# ===========================
+# Backend (Java / Maven)
+# ===========================
+backend/target/
+backend/*.jar
+backend/.mvn/repository/
+backend/logs/
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+hs_err_pid*
+
+# Maven wrapper generated
+!backend/.mvn/wrapper/maven-wrapper.jar
+!backend/.mvn/wrapper/maven-wrapper.properties
+
+# ===========================
+# Application Config (Secrets)
+# ===========================
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-prod.yml
+backend/src/main/resources/application-secrets.yml
+*.env
+.env
+.env.*
+!.env.example
+
+# ===========================
+# Deploy
+# ===========================
+deploy/.data/
+deploy/mysql/data/
+deploy/redis/data/
+deploy/minio/data/
+deploy/nginx/logs/
+
+# ===========================
+# Build Artifacts (project builds)
+# ===========================
+/opt/vibeproto/
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+
+# ===========================
+# Temporary files
+# ===========================
+tmp/
+temp/
+*.tmp
+*.temp
