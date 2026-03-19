@@ -25,7 +25,7 @@
       </el-table-column>
     </el-table>
 
-    <UploadZipDialog v-model="uploadDialogVisible" @submit="handleUpload" />
+    <UploadZipDialog v-model="uploadDialogVisible" :uploading="uploading" @submit="handleUpload" />
     <HtmlCreateDialog v-model="htmlDialogVisible" @submit="handleHtmlCreate" />
     <GitImportDialog v-model="gitDialogVisible" @submit="handleGitImport" />
   </section>
@@ -43,6 +43,7 @@ import type { SourceVersion } from '@/types/sourceVersion'
 const props = defineProps<{ projectId: number }>()
 
 const loading = ref(false)
+const uploading = ref(false)
 const records = ref<SourceVersion[]>([])
 const uploadDialogVisible = ref(false)
 const htmlDialogVisible = ref(false)
@@ -61,10 +62,15 @@ async function loadData() {
 }
 
 async function handleUpload(payload: { file: File; remark: string }) {
-  await uploadSourceZip(props.projectId, payload.file, payload.remark)
-  uploadDialogVisible.value = false
-  ElMessage.success('ZIP 已上传')
-  await loadData()
+  uploading.value = true
+  try {
+    await uploadSourceZip(props.projectId, payload.file, payload.remark)
+    uploadDialogVisible.value = false
+    ElMessage.success('ZIP 已上传')
+    await loadData()
+  } finally {
+    uploading.value = false
+  }
 }
 
 async function handleHtmlCreate(payload: { sourceName: string; htmlContent: string; remark: string }) {

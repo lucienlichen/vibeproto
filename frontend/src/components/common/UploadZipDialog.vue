@@ -19,8 +19,10 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="closeDialog">取消</el-button>
-      <el-button type="primary" :disabled="!file" @click="submit">上传</el-button>
+      <el-button :disabled="uploading" @click="closeDialog">取消</el-button>
+      <el-button type="primary" :disabled="!file" :loading="uploading" @click="submit">
+        {{ uploading ? '上传中...' : '上传' }}
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -29,7 +31,7 @@
 import type { UploadFile, UploadFiles } from 'element-plus'
 import { ref } from 'vue'
 
-defineProps<{ modelValue: boolean }>()
+defineProps<{ modelValue: boolean, uploading?: boolean }>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   submit: [{ file: File; remark: string }]
