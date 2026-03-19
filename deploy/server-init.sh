@@ -16,9 +16,10 @@ apt-get update -q
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 echo "=== Creating data directories ==="
-mkdir -p /opt/vibeproto/projects
-mkdir -p /opt/vibeproto/storage
-mkdir -p /opt/vibeproto/deploy
+sudo mkdir -p /opt/vibeproto/projects
+sudo mkdir -p /opt/vibeproto/storage
+sudo mkdir -p /opt/vibeproto/deploy
+sudo chown -R $USER:$USER /opt/vibeproto
 
 echo "=== Creating .env from example ==="
 if [ ! -f /opt/vibeproto/deploy/.env ]; then
