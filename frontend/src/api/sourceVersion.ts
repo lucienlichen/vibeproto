@@ -13,7 +13,9 @@ export function uploadSourceZip(projectId: number, file: File, remark: string) {
   formData.append('projectId', String(projectId))
   formData.append('remark', remark)
   formData.append('file', file)
-  return http.post<ApiResponse<SourceVersion>, ApiResponse<SourceVersion>>('/source-versions/upload', formData)
+  return http.post<ApiResponse<SourceVersion>, ApiResponse<SourceVersion>>('/source-versions/upload', formData, {
+    timeout: 300000
+  })
 }
 
 export function createHtmlSource(payload: SourceVersionHtmlPayload) {
