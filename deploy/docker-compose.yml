@@ -38,7 +38,10 @@ services:
       - minio-data:/data
 
   backend:
-    image: ${REGISTRY:-ghcr.io/lucienlichen}/vibeproto-backend:${IMAGE_TAG:-latest}
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: vibeproto-backend:local
     container_name: vibeproto-backend
     restart: unless-stopped
     depends_on:
@@ -66,7 +69,10 @@ services:
       - ${STORAGE_ROOT:-/opt/vibeproto/storage}:/opt/vibeproto/storage
 
   frontend:
-    image: ${REGISTRY:-ghcr.io/lucienlichen}/vibeproto-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: vibeproto-frontend:local
     container_name: vibeproto-frontend
     restart: unless-stopped
     depends_on:
