@@ -18,7 +18,7 @@ http.interceptors.request.use((config) => {
 })
 
 http.interceptors.response.use(
-  (response) => {
+  (response): any => {
     const payload = response.data as ApiResponse<unknown>
     if (payload.code !== 0) {
       ElMessage.error(payload.message || '请求失败')
