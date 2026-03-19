@@ -8,13 +8,23 @@ export function fetchSourceVersions(projectId: number) {
   })
 }
 
-export function uploadSourceZip(projectId: number, file: File, remark: string) {
+export function uploadSourceZip(
+  projectId: number,
+  file: File,
+  remark: string,
+  onProgress?: (percent: number) => void
+) {
   const formData = new FormData()
   formData.append('projectId', String(projectId))
   formData.append('remark', remark)
   formData.append('file', file)
   return http.post<ApiResponse<SourceVersion>, ApiResponse<SourceVersion>>('/source-versions/upload', formData, {
-    timeout: 300000
+    timeout: 600000,
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) {
+        onProgress(Math.round((e.loaded * 100) / e.total))
+      }
+    }
   })
 }
 

@@ -25,7 +25,7 @@
       </el-table-column>
     </el-table>
 
-    <UploadZipDialog v-model="uploadDialogVisible" :uploading="uploading" @submit="handleUpload" />
+    <UploadZipDialog v-model="uploadDialogVisible" :uploading="uploading" :progress="uploadProgress" @submit="handleUpload" />
     <HtmlCreateDialog v-model="htmlDialogVisible" @submit="handleHtmlCreate" />
     <GitImportDialog v-model="gitDialogVisible" @submit="handleGitImport" />
   </section>
@@ -44,6 +44,7 @@ const props = defineProps<{ projectId: number }>()
 
 const loading = ref(false)
 const uploading = ref(false)
+const uploadProgress = ref(0)
 const records = ref<SourceVersion[]>([])
 const uploadDialogVisible = ref(false)
 const htmlDialogVisible = ref(false)
@@ -63,13 +64,17 @@ async function loadData() {
 
 async function handleUpload(payload: { file: File; remark: string }) {
   uploading.value = true
+  uploadProgress.value = 0
   try {
-    await uploadSourceZip(props.projectId, payload.file, payload.remark)
+    await uploadSourceZip(props.projectId, payload.file, payload.remark, (percent) => {
+      uploadProgress.value = percent
+    })
     uploadDialogVisible.value = false
     ElMessage.success('ZIP 已上传')
     await loadData()
   } finally {
     uploading.value = false
+    uploadProgress.value = 0
   }
 }
 
