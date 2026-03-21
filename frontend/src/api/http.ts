@@ -27,7 +27,8 @@ http.interceptors.response.use(
     return payload
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    if (status === 401 || status === 403) {
       const userStore = useUserStore()
       userStore.clearSession()
       router.push('/login')
