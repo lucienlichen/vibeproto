@@ -203,7 +203,13 @@ public class BuildTaskExecutor {
             // Determine Docker image
             String dockerImage = buildProperties.dockerImage();
             if (StringUtils.hasText(profile.getNodeVersion())) {
-                dockerImage = "node:" + profile.getNodeVersion() + "-alpine";
+                String nv = profile.getNodeVersion().trim();
+                // If nodeVersion already looks like a full image reference (e.g. "node:18-alpine"), use as-is
+                if (nv.contains(":")) {
+                    dockerImage = nv;
+                } else {
+                    dockerImage = "node:" + nv + "-alpine";
+                }
             }
 
             log.append("Docker 镜像: ").append(dockerImage).append('\n');
