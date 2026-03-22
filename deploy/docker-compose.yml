@@ -67,6 +67,7 @@ services:
     volumes:
       - ${DEPLOY_ROOT:-/opt/vibeproto/projects}:/opt/vibeproto/projects
       - ${STORAGE_ROOT:-/opt/vibeproto/storage}:/opt/vibeproto/storage
+      - /var/run/docker.sock:/var/run/docker.sock
 
   frontend:
     build:
