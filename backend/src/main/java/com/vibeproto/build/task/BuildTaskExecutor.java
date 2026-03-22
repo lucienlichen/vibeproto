@@ -81,14 +81,13 @@ public class BuildTaskExecutor {
         task.setStartTime(start);
         buildTaskMapper.updateById(task);
 
+        StringBuilder log = new StringBuilder();
         try {
             BuildTask latest = buildTaskMapper.selectById(taskId);
             if (latest == null || BuildStatus.canceled.name().equals(latest.getStatus())) {
                 writeLog(project, task, "构建任务已取消\n");
                 return;
             }
-
-            StringBuilder log = new StringBuilder();
             log.append("开始构建\n");
             log.append("项目: ").append(project.getName()).append('\n');
             log.append("源码版本: ").append(sourceVersion.getVersionNo()).append('\n');
@@ -150,7 +149,8 @@ public class BuildTaskExecutor {
         } catch (Exception exception) {
             String errMsg = exception.getMessage();
             try {
-                String logPath = writeLog(project, task, "构建失败\n错误信息: " + errMsg + "\n");
+                log.append("构建失败\n错误信息: ").append(errMsg).append("\n");
+                String logPath = writeLog(project, task, log.toString());
                 task.setLogPath(logPath);
                 buildTaskMapper.updateById(task);
             } catch (Exception ignored) {
@@ -213,9 +213,13 @@ public class BuildTaskExecutor {
             // Run build in Docker container
             // workDir is under /opt/vibeproto/projects which is a shared volume,
             // so the host path equals the container path
+            String volumeMount = workDir.toAbsolutePath() + ":/app";
+            log.append("Docker 命令: docker run --rm -v ").append(volumeMount)
+               .append(" -w /app ").append(dockerImage).append(" sh -c \"").append(fullCmd).append("\"\n");
+
             ProcessBuilder pb = new ProcessBuilder(
                 "docker", "run", "--rm",
-                "-v", workDir.toAbsolutePath() + ":/app",
+                "-v", volumeMount,
                 "-w", "/app",
                 dockerImage,
                 "sh", "-c", fullCmd
