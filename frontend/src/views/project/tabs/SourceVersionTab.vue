@@ -27,7 +27,7 @@
 
     <UploadZipDialog v-model="uploadDialogVisible" :uploading="uploading" :progress="uploadProgress" @submit="handleUpload" />
     <HtmlCreateDialog v-model="htmlDialogVisible" @submit="handleHtmlCreate" />
-    <GitImportDialog v-model="gitDialogVisible" @submit="handleGitImport" />
+    <GitImportDialog v-model="gitDialogVisible" :importing="gitImporting" :import-status="gitImportStatus" @submit="handleGitImport" />
   </section>
 </template>
 
@@ -45,6 +45,8 @@ const props = defineProps<{ projectId: number }>()
 const loading = ref(false)
 const uploading = ref(false)
 const uploadProgress = ref(0)
+const gitImporting = ref(false)
+const gitImportStatus = ref('正在克隆仓库...')
 const records = ref<SourceVersion[]>([])
 const uploadDialogVisible = ref(false)
 const htmlDialogVisible = ref(false)
@@ -86,10 +88,23 @@ async function handleHtmlCreate(payload: { sourceName: string; htmlContent: stri
 }
 
 async function handleGitImport(payload: { gitUrl: string; gitBranch: string; commitHash: string; remark: string }) {
-  await importGitSource({ projectId: props.projectId, ...payload })
-  gitDialogVisible.value = false
-  ElMessage.success('Git 导入记录已创建')
-  await loadData()
+  gitImporting.value = true
+  gitImportStatus.value = '正在克隆仓库...'
+  // Simulate progress stages (actual clone is server-side, we show time-based stages)
+  const timer = setTimeout(() => { gitImportStatus.value = '正在打包源码...' }, 5000)
+  const timer2 = setTimeout(() => { gitImportStatus.value = '正在存储文件...' }, 10000)
+  try {
+    await importGitSource({ projectId: props.projectId, ...payload })
+    gitDialogVisible.value = false
+    ElMessage.success('Git 源码导入成功')
+    await loadData()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || 'Git 导入失败')
+  } finally {
+    gitImporting.value = false
+    clearTimeout(timer)
+    clearTimeout(timer2)
+  }
 }
 
 async function handleDelete(id: number) {

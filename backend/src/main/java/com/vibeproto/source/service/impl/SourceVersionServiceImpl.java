@@ -12,6 +12,8 @@ import com.vibeproto.source.enums.SourceType;
 import com.vibeproto.source.mapper.SourceVersionMapper;
 import com.vibeproto.source.service.SourceVersionService;
 import com.vibeproto.source.vo.SourceVersionVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,6 +33,8 @@ import java.util.zip.ZipOutputStream;
 
 @Service
 public class SourceVersionServiceImpl implements SourceVersionService {
+
+    private static final Logger log = LoggerFactory.getLogger(SourceVersionServiceImpl.class);
 
     private final SourceVersionMapper sourceVersionMapper;
     private final ProjectMapper projectMapper;
@@ -109,6 +113,7 @@ public class SourceVersionServiceImpl implements SourceVersionService {
             cmd.add(request.gitUrl());
             cmd.add(cloneDir.toString());
 
+            log.info("Git clone: {} branch={}", request.gitUrl(), request.gitBranch());
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
             Process process = pb.start();
@@ -121,6 +126,7 @@ public class SourceVersionServiceImpl implements SourceVersionService {
             if (process.exitValue() != 0) {
                 throw new BizException(5002, "Git 克隆失败: " + output);
             }
+            log.info("Git clone output: {}", output);
 
             // If commitHash specified, checkout it
             if (StringUtils.hasText(request.commitHash())) {
@@ -131,9 +137,21 @@ public class SourceVersionServiceImpl implements SourceVersionService {
                 cp.waitFor(30, TimeUnit.SECONDS);
             }
 
+            // Verify clone has files
+            long fileCount = Files.walk(cloneDir)
+                .filter(Files::isRegularFile)
+                .filter(p -> !p.toString().contains("/.git/"))
+                .count();
+            if (fileCount == 0) {
+                throw new BizException(5004, "Git 克隆成功但仓库为空（0个文件）");
+            }
+            log.info("Git clone successful: {} files", fileCount);
+
             // 2. Zip the cloned content (excluding .git directory)
             zipFile = tempDir.resolve("source.zip");
             zipDirectory(cloneDir, zipFile);
+            long zipSize = Files.size(zipFile);
+            log.info("Zip created: {} bytes", zipSize);
 
             // 3. Store the zip via fileStorageService
             String filename = fileStorageService.uniqueFilename("git-source.zip", ".zip");

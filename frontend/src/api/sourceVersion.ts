@@ -44,7 +44,9 @@ export function importGitSource(payload: SourceVersionGitPayload) {
   formData.append('gitBranch', payload.gitBranch)
   formData.append('commitHash', payload.commitHash)
   formData.append('remark', payload.remark)
-  return http.post<ApiResponse<SourceVersion>, ApiResponse<SourceVersion>>('/source-versions/git-import', formData)
+  return http.post<ApiResponse<SourceVersion>, ApiResponse<SourceVersion>>('/source-versions/git-import', formData, {
+    timeout: 180000
+  })
 }
 
 export function deleteSourceVersion(id: number) {
