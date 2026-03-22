@@ -39,6 +39,14 @@ public class FileStorageService {
         return normalize(relativeDir + "/" + filename);
     }
 
+    public String storeFile(Path sourceFile, String relativeDir, String filename) throws IOException {
+        Path directory = resolve(relativeDir);
+        Files.createDirectories(directory);
+        Path target = directory.resolve(filename);
+        Files.copy(sourceFile, target, StandardCopyOption.REPLACE_EXISTING);
+        return normalize(relativeDir + "/" + filename);
+    }
+
     public String uniqueFilename(String originalFilename, String fallbackExtension) {
         String extension = StringUtils.getFilenameExtension(originalFilename);
         String suffix = StringUtils.hasText(extension) ? "." + extension : fallbackExtension;

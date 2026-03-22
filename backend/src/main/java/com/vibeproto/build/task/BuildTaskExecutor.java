@@ -97,14 +97,14 @@ public class BuildTaskExecutor {
             Path releaseDir = Path.of(deployProperties.rootPath(), project.getCode(), "releases", versionNo);
             Files.createDirectories(releaseDir);
 
-            if ("zip".equals(sourceType) && sourceVersion.getFilePath() != null) {
+            if (sourceVersion.getFilePath() != null && ("zip".equals(sourceType) || "git".equals(sourceType))) {
                 Path zipFile = Path.of(storageProperties.rootPath()).resolve(sourceVersion.getFilePath());
                 if (Files.exists(zipFile)) {
-                    logBuilder.append("解压 ZIP 源码: ").append(zipFile.getFileName()).append('\n');
+                    logBuilder.append("解压源码包: ").append(zipFile.getFileName()).append('\n');
                     extractZip(zipFile, releaseDir, buildProfile.getOutputDir());
-                    logBuilder.append("ZIP 解压完成\n");
+                    logBuilder.append("源码解压完成\n");
                 } else {
-                    logBuilder.append("警告: ZIP 文件不存在，创建占位页面\n");
+                    logBuilder.append("警告: 源码文件不存在，创建占位页面\n");
                     writePlaceholder(releaseDir, project.getName(), versionNo);
                 }
             } else if ("html".equals(sourceType) && sourceVersion.getHtmlContentPath() != null) {
