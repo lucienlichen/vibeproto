@@ -98,6 +98,10 @@ public class BuildTaskExecutor {
             long releaseCount = countReleases(task.getProjectId());
             String versionNo = "v" + (releaseCount + 1);
             Path releaseDir = Path.of(deployProperties.rootPath(), project.getCode(), "releases", versionNo);
+            // Clean existing release dir to avoid leftover files from previous builds
+            if (Files.exists(releaseDir)) {
+                deleteDirectory(releaseDir);
+            }
             Files.createDirectories(releaseDir);
 
             if (sourceVersion.getFilePath() != null && ("zip".equals(sourceType) || "git".equals(sourceType))) {
