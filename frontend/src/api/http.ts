@@ -19,6 +19,10 @@ http.interceptors.request.use((config) => {
 
 http.interceptors.response.use(
   (response): any => {
+    // Blob responses (file downloads) bypass JSON parsing
+    if (response.config.responseType === 'blob') {
+      return response
+    }
     const payload = response.data as ApiResponse<unknown>
     if (payload.code !== 0) {
       ElMessage.error(payload.message || '请求失败')

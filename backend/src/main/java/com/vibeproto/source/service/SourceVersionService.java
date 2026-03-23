@@ -6,6 +6,7 @@ import com.vibeproto.source.vo.SourceVersionVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public interface SourceVersionService {
@@ -19,4 +20,6 @@ public interface SourceVersionService {
     List<SourceVersionVO> listByProjectId(Long projectId);
 
     void delete(Long id);
+
+    Path getDownloadFile(Long id);
 }

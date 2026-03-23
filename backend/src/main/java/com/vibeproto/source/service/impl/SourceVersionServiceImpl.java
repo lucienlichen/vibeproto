@@ -250,6 +250,29 @@ public class SourceVersionServiceImpl implements SourceVersionService {
         sourceVersionMapper.deleteById(id);
     }
 
+    @Override
+    public Path getDownloadFile(Long id) {
+        SourceVersion sourceVersion = sourceVersionMapper.selectById(id);
+        if (sourceVersion == null) {
+            throw new BizException(4041, "源码版本不存在");
+        }
+
+        String relativePath = sourceVersion.getFilePath();
+        if (!StringUtils.hasText(relativePath)) {
+            // HTML type — wrap into a zip for download
+            relativePath = sourceVersion.getHtmlContentPath();
+        }
+        if (!StringUtils.hasText(relativePath)) {
+            throw new BizException(4042, "该源码版本没有可下载的文件");
+        }
+
+        Path file = Path.of(fileStorageService.getRootPath()).resolve(relativePath).normalize();
+        if (!Files.exists(file)) {
+            throw new BizException(4043, "源码文件不存在，可能已被清理");
+        }
+        return file;
+    }
+
     private Project requireProject(Long projectId) {
         Project project = projectMapper.selectById(projectId);
         if (project == null) {

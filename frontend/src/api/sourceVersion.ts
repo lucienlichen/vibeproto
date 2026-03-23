@@ -49,6 +49,12 @@ export function importGitSource(payload: SourceVersionGitPayload) {
   })
 }
 
+export function downloadSourceVersion(id: number) {
+  return http.get(`/source-versions/${id}/download`, {
+    responseType: 'blob'
+  })
+}
+
 export function deleteSourceVersion(id: number) {
   return http.delete<ApiResponse<null>, ApiResponse<null>>(`/source-versions/${id}`)
 }

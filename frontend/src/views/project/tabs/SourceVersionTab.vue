@@ -18,8 +18,9 @@
       <el-table-column prop="sourceName" label="来源信息" min-width="220" />
       <el-table-column prop="remark" label="说明" min-width="220" />
       <el-table-column prop="createdAt" label="提交时间" min-width="180" />
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="160">
         <template #default="{ row }">
+          <el-button link type="primary" @click="handleDownload(row)">下载</el-button>
           <el-button link type="danger" @click="handleDelete(row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -37,7 +38,7 @@ import { onMounted, ref } from 'vue'
 import GitImportDialog from '@/components/common/GitImportDialog.vue'
 import HtmlCreateDialog from '@/components/common/HtmlCreateDialog.vue'
 import UploadZipDialog from '@/components/common/UploadZipDialog.vue'
-import { createHtmlSource, deleteSourceVersion, fetchSourceVersions, importGitSource, uploadSourceZip } from '@/api/sourceVersion'
+import { createHtmlSource, deleteSourceVersion, downloadSourceVersion, fetchSourceVersions, importGitSource, uploadSourceZip } from '@/api/sourceVersion'
 import type { SourceVersion } from '@/types/sourceVersion'
 
 const props = defineProps<{ projectId: number }>()
@@ -104,6 +105,22 @@ async function handleGitImport(payload: { gitUrl: string; gitBranch: string; com
     gitImporting.value = false
     clearTimeout(timer)
     clearTimeout(timer2)
+  }
+}
+
+async function handleDownload(row: SourceVersion) {
+  try {
+    const response = await downloadSourceVersion(row.id) as any
+    const blob = new Blob([response.data ?? response])
+    const filename = row.sourceName || `${row.versionNo}.zip`
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch {
+    ElMessage.error('下载失败')
   }
 }
 

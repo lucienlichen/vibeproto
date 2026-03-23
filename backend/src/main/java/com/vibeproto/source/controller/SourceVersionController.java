@@ -7,6 +7,11 @@ import com.vibeproto.source.dto.HtmlCreateRequest;
 import com.vibeproto.source.service.SourceVersionService;
 import com.vibeproto.source.vo.SourceVersionVO;
 import jakarta.validation.Valid;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -54,6 +60,17 @@ public class SourceVersionController {
     @GetMapping
     public Result<List<SourceVersionVO>> list(@RequestParam Long projectId) {
         return Result.success(sourceVersionService.listByProjectId(projectId));
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> download(@PathVariable Long id) {
+        Path file = sourceVersionService.getDownloadFile(id);
+        String filename = file.getFileName().toString();
+        Resource resource = new FileSystemResource(file);
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+            .body(resource);
     }
 
     @DeleteMapping("/{id}")

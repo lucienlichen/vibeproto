@@ -53,6 +53,10 @@ public class FileStorageService {
         return UUID.randomUUID().toString().replace("-", "") + suffix;
     }
 
+    public String getRootPath() {
+        return storageProperties.rootPath();
+    }
+
     private Path resolve(String relativeDir) {
         return Path.of(storageProperties.rootPath()).resolve(relativeDir).normalize();
     }
